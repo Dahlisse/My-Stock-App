@@ -1,0 +1,21 @@
+[server]
+headless = true
+실행(기본값)
+port = 8501
+enableCORS = false
+(Streamlit Cloud 대응)
+enableXsrfProtection = false
+
+[browser]
+gatherUsageStats = false
+함(프라이버시 보호)
+
+[theme]
+base = "light"
+primaryColor = "#1A73E8"
+포인트 색
+backgroundColor = "#FFFFFF"
+(흰색)
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"
+font = "sans serif"
