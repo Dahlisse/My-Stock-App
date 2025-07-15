@@ -1,0 +1,41 @@
+# ▶ 1단계: 베이스 이미지
+FROM python:3.11-slim
+
+# ▶ 2단계: 시스템 레벨 패키지 설치
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libglib2.0-0 \
+    libgl1-mesa-glx \
+    libglib2.0-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libz-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libsndfile1 \
+    curl \
+    unzip \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# ▶ 3단계: 작업 디렉토리 설정
+WORKDIR /app
+
+# ▶ 4단계: requirements.txt 복사 및 설치
+COPY requirements.txt ./
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ▶ 5단계: 전체 코드 복사
+COPY . .
+
+# ▶ 6단계: Streamlit 기본 설정 (포트/캐시 비활성화 등)
+ENV STREAMLIT_PORT=8501
+ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+
+# ▶ 7단계: 실행 명령 (필요 시 config.toml을 무시하지 않게 설정)
+EXPOSE ${STREAMLIT_PORT}
+CMD ["streamlit", "run", "app.py", "--server.port=${STREAMLIT_PORT}", "--server.enableCORS=false"]
+
+
