@@ -1,128 +1,105 @@
-# module_25.py
+# module_26.py
 
 import pandas as pd
 import numpy as np
-from datetime import datetime
-from sklearn.preprocessing import MinMaxScaler
+from datetime import datetime, timedelta
 
 
-class MarketSentimentAnalyzer:
+class NonActionZoneDetector:
     """
-    25.1 시장 심리 지표 수집 & 시각화
+    26.1 비매매(Non-Action) 판단 구조 설계
+    """
+
+    def __init__(self, threshold_volatility=0.25, threshold_condition=0.6, threshold_accuracy=0.55):
+        self.threshold_volatility = threshold_volatility
+        self.threshold_condition = threshold_condition
+        self.threshold_accuracy = threshold_accuracy
+
+    def evaluate_market(self, vix, strategy_condition_score, prediction_accuracy):
+        """
+        전략 조건 충족률 + 시장 위험 + 예측 정확도 기반 매매 보류 판단
+        """
+        result = {}
+        result['VIX'] = vix
+        result['ConditionScore'] = strategy_condition_score
+        result['PredictionAccuracy'] = prediction_accuracy
+
+        if vix > self.threshold_volatility and strategy_condition_score < self.threshold_condition:
+            result['advice'] = "❌ 시장 변동성↑ + 조건 불충분 → 매매 보류 권고"
+        elif prediction_accuracy < self.threshold_accuracy:
+            result['advice'] = "⚠️ 예측 정확도 낮음 → 진입 신중 권고"
+        else:
+            result['advice'] = "✅ 매매 가능 구간"
+        return result
+
+    def is_non_action_zone(self, result_dict):
+        return "보류" in result_dict.get("advice", "")
+
+
+class OpportunityZoneDetector:
+    """
+    26.2 기회 밀집 구간 탐지 시스템
     """
 
     def __init__(self):
-        self.sentiment_history = pd.DataFrame()
+        self.past_patterns = []
 
-    def update_sentiment_data(self, date, fear_greed, vix, short_ratio, news_sentiment):
-        new_row = {
-            'date': pd.to_datetime(date),
-            'FearGreed': fear_greed,
-            'VIX': vix,
-            'ShortRatio': short_ratio,
-            'NewsSentiment': news_sentiment
-        }
-        self.sentiment_history = pd.concat([self.sentiment_history, pd.DataFrame([new_row])], ignore_index=True)
-
-    def classify_sentiment_phase(self):
+    def register_success_pattern(self, macro, tech, sentiment):
         """
-        공포 → 중립 → 탐욕 구간 분류 (0~100 스케일 기반)
+        과거 성공 전략 패턴 등록
         """
-        if self.sentiment_history.empty:
-            return "데이터 없음"
+        self.past_patterns.append({
+            "macro": macro,
+            "tech": tech,
+            "sentiment": sentiment
+        })
 
-        fg_index = self.sentiment_history['FearGreed'].iloc[-1]
-        if fg_index < 30:
-            return "현재 심리 국면: 공포 ({}점)".format(fg_index)
-        elif fg_index < 60:
-            return "현재 심리 국면: 중립 ({}점)".format(fg_index)
+    def match_current_conditions(self, macro, tech, sentiment):
+        """
+        현재 조건이 과거 성공 패턴과 얼마나 유사한지 평가 (0~1)
+        """
+        scores = []
+        for pattern in self.past_patterns:
+            m_sim = 1 - abs(macro - pattern["macro"])
+            t_sim = 1 - abs(tech - pattern["tech"])
+            s_sim = 1 - abs(sentiment - pattern["sentiment"])
+            scores.append((m_sim + t_sim + s_sim) / 3)
+
+        if not scores:
+            return 0.0
+        return round(np.mean(scores), 3)
+
+    def advise_opportunity(self, score, threshold=0.85):
+        if score > threshold:
+            return f"🎯 기회 밀집 스코어 {score} → 집중 매매 전략 실행 권장"
         else:
-            # 이행 추세까지 고려
-            prev_fg = self.sentiment_history['FearGreed'].iloc[-2] if len(self.sentiment_history) > 1 else fg_index
-            delta = fg_index - prev_fg
-            return f"현재 심리 국면: 중립 → 탐욕 이행 중 ({fg_index}점, 변화율 {round(delta, 2)})"
-
-    def get_sentiment_timeseries(self):
-        return self.sentiment_history.set_index('date')
+            return f"📉 기회 스코어 {score} → 보수적 접근 권장"
 
 
-class StrategySentimentMapper:
+class StrategyAutoControl:
     """
-    25.2 전략-심리 적합도 매핑 시스템
+    26.3 자동 전환 & 대기 상태 진입 시스템
     """
 
     def __init__(self):
-        self.mapping = {
-            '공포': ['방어형', '절대수익형'],
-            '중립': ['중립형', '퀀트모멘텀'],
-            '탐욕': ['모멘텀', '초단타형']
-        }
+        self.state = "ACTIVE"
+        self.last_suspend_date = None
 
-    def map_phase_to_strategies(self, phase_label):
-        if '공포' in phase_label:
-            return self.mapping['공포']
-        elif '중립' in phase_label and '→ 탐욕' not in phase_label:
-            return self.mapping['중립']
-        else:
-            return self.mapping['탐욕']
-
-    def compute_fit_scores(self, strategy_name, history_df):
+    def check_auto_suspend(self, vix, trust_score, vix_threshold=30, trust_threshold=0.4):
         """
-        전략별 심리 국면 적합도 계산 (단순 스케일링 기반)
+        VIX 급등 또는 전략 신뢰도 저하 시 자동 중단
         """
-        if history_df.empty:
-            return "데이터 부족"
+        if vix > vix_threshold or trust_score < trust_threshold:
+            self.state = "SUSPENDED"
+            self.last_suspend_date = datetime.now().date()
+            return f"⚠️ 자동 매매 중단 → 조건 충족 시 재개 예정"
+        return "✅ 전략 유지"
 
-        scaler = MinMaxScaler()
-        scaled = scaler.fit_transform(history_df[['FearGreed', 'VIX', 'ShortRatio']])
-        avg_score = scaled.mean(axis=0).mean()
-        phase_score = {
-            '방어형': 1 - avg_score,
-            '절대수익형': 0.9 - avg_score * 0.5,
-            '중립형': 1 - abs(avg_score - 0.5),
-            '퀀트모멘텀': avg_score * 0.8,
-            '모멘텀': avg_score,
-            '초단타형': min(1.0, avg_score * 1.2)
-        }
-
-        return f"전략 '{strategy_name}' → 현재 심리 국면 적합도: {round(phase_score.get(strategy_name, 0), 2)}"
-
-
-class SentimentSurgeDetector:
-    """
-    25.3 심리 과열/침체 경고 시스템
-    """
-
-    def __init__(self):
-        self.keyword_log = pd.DataFrame()
-
-    def update_keyword_counts(self, date, keyword_counts: dict):
-        row = {'date': pd.to_datetime(date)}
-        row.update(keyword_counts)
-        self.keyword_log = pd.concat([self.keyword_log, pd.DataFrame([row])], ignore_index=True)
-
-    def detect_overheat_or_fear(self, threshold=2.0):
+    def get_resume_forecast(self, expected_days=3, recovery_prob=0.62):
         """
-        빚투, 영끌, 대박 등의 급증 탐지
+        재개 가능 시점 및 확률 안내
         """
-        if len(self.keyword_log) < 2:
-            return "키워드 데이터 부족"
-
-        recent = self.keyword_log.tail(2)
-        diffs = recent.iloc[1][1:] / (recent.iloc[0][1:] + 1e-6)
-        alert_keywords = diffs[diffs > threshold].index.tolist()
-
-        if alert_keywords:
-            return f"⚠️ 과열 신호 감지: {', '.join(alert_keywords)} 키워드 급증"
-        return "이상 없음"
-
-    def generate_strategy_suspension_advice(self, news_sentiment_score, vix_value):
-        """
-        과열 or 공포 상황 시 전략 중단/보류 제안
-        """
-        if news_sentiment_score > 0.8 and vix_value < 15:
-            return "⚠️ 시장 과열: 단타 전략 보류 권고"
-        elif news_sentiment_score < 0.2 and vix_value > 30:
-            return "⚠️ 시장 공포: 위험 전략 리밸런싱 권고"
-        else:
-            return "전략 유지 가능"
+        if self.state == "SUSPENDED" and self.last_suspend_date:
+            resume_date = self.last_suspend_date + timedelta(days=expected_days)
+            return f"현재는 비매매 구간입니다. 진입 가능성은 {expected_days}일 후 {int(recovery_prob * 100)}%"
+        return "전략은 현재 정상 작동 중입니다."
