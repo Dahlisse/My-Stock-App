@@ -1,6 +1,5 @@
 # module_18.py
 
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -10,10 +9,10 @@ from sklearn.manifold import TSNE
 
 # 18.1 메트릭 정규화 + 보정 해석
 def normalize_metrics(strategy_df):
+    strategy_df = strategy_df.copy()
     scaler = MinMaxScaler()
     numeric_cols = ['CAGR', 'Sharpe', 'Calmar', 'MDD', 'Volatility']
-    normalized = pd.DataFrame(scaler.fit_transform(strategy_df[numeric_cols]), columns=numeric_cols, index=strategy_df.index)
-    strategy_df[numeric_cols] = normalized
+    strategy_df[numeric_cols] = scaler.fit_transform(strategy_df[numeric_cols])
     return strategy_df
 
 def interpret_metrics(row):
@@ -28,9 +27,14 @@ def interpret_metrics(row):
 
 # 18.2 전략 간 상관관계 히트맵
 def plot_strategy_correlation(strategy_returns):
+    if strategy_returns.empty:
+        print("❗ 전략 수익률 데이터가 비어 있습니다.")
+        return pd.DataFrame()
     corr = strategy_returns.corr()
-    sns.heatmap(corr, annot=True, cmap='coolwarm')
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(corr, annot=True, cmap='coolwarm', fmt=".2f")
     plt.title("전략 간 상관관계 히트맵")
+    plt.tight_layout()
     plt.show()
     return corr
 
@@ -40,20 +44,21 @@ def visualize_strategy_space(strategy_df, method='pca'):
     if method == 'pca':
         reducer = PCA(n_components=2)
     else:
-        reducer = TSNE(n_components=2, perplexity=5, n_iter=500, random_state=0)
+        reducer = TSNE(n_components=2, perplexity=5, n_iter=500, random_state=42)
     reduced = reducer.fit_transform(features)
     result = pd.DataFrame(reduced, columns=['X', 'Y'], index=strategy_df.index)
 
-    plt.figure(figsize=(6,5))
+    plt.figure(figsize=(6, 5))
     sns.scatterplot(data=result, x='X', y='Y', hue=strategy_df.index, s=100)
     plt.title(f"전략 군 시각화 ({method.upper()})")
+    plt.tight_layout()
     plt.show()
 
     return result
 
 # 18.3 트레이드오프 분석
 def tradeoff_analysis(strategy_df):
-    plt.figure(figsize=(7,5))
+    plt.figure(figsize=(7, 5))
     sns.scatterplot(
         x='Volatility', y='CAGR', hue=strategy_df.index,
         size='Sharpe', sizes=(50, 200), data=strategy_df
@@ -62,13 +67,20 @@ def tradeoff_analysis(strategy_df):
     plt.xlabel("변동성 (낮을수록 안정)")
     plt.ylabel("연 수익률 (CAGR)")
     plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
     # 파레토 우위 추정
     pareto_front = []
     for i, row in strategy_df.iterrows():
-        if all((row['CAGR'] >= other['CAGR']) and (row['Volatility'] <= other['Volatility']) 
-               for j, other in strategy_df.iterrows() if i != j):
+        dominated = False
+        for j, other in strategy_df.iterrows():
+            if i == j:
+                continue
+            if (other['CAGR'] >= row['CAGR']) and (other['Volatility'] <= row['Volatility']):
+                dominated = True
+                break
+        if not dominated:
             pareto_front.append(i)
 
     return pareto_front
@@ -78,13 +90,13 @@ def run_metric_comparator(strategy_df, returns_df):
     strategy_df = normalize_metrics(strategy_df)
     strategy_df['설명'] = strategy_df.apply(interpret_metrics, axis=1)
 
-    corr = plot_strategy_correlation(returns_df)
-    tsne_result = visualize_strategy_space(strategy_df, method='tsne')
-    pareto_strategies = tradeoff_analysis(strategy_df)
+    correlation = plot_strategy_correlation(returns_df)
+    tsne_coords = visualize_strategy_space(strategy_df, method='tsne')
+    pareto_front = tradeoff_analysis(strategy_df)
 
     return {
         'normalized_df': strategy_df,
-        'correlation': corr,
-        'tsne_coords': tsne_result,
-        'pareto_front': pareto_strategies
+        'correlation': correlation,
+        'tsne_coords': tsne_coords,
+        'pareto_front': pareto_front
     }
