@@ -1,5 +1,3 @@
-# module_09.py
-
 import datetime
 import json
 import os
@@ -29,7 +27,7 @@ def performance_alert(performance_history: dict, threshold_drop=0.05):
     prev = performance_history[sorted_dates[-2]]
     drop = prev - latest
     if drop >= threshold_drop:
-        return f"경고: 최근 하루 수익률이 {drop*100:.2f}% 하락했습니다."
+        return f"⚠️ 경고: 최근 하루 수익률이 {drop*100:.2f}% 하락했습니다."
     return None
 
 # 9.2 행동 안내 내비게이션
@@ -41,15 +39,15 @@ def generate_action_guide(current_state: dict):
         '최근_변동성': float
     }
     """
-    guide = "현재 시장 상황 분석 결과:\n"
-    if current_state['심리_상태'] == '과열':
+    guide = "📊 현재 시장 상황 분석 결과:\n"
+    if current_state.get('심리_상태') == '과열':
         guide += "- 매수 자제 권고, 위험 분산 필요\n"
-    elif current_state['심리_상태'] == '침체':
+    elif current_state.get('심리_상태') == '침체':
         guide += "- 매수 기회, 포트 확대 고려\n"
     else:
         guide += "- 관망 권고, 추가 신호 대기\n"
 
-    if current_state['최근_변동성'] > 0.07:
+    if current_state.get('최근_변동성', 0.0) > 0.07:
         guide += "- 변동성 증가 주의, 리스크 관리 강화\n"
 
     return guide
@@ -61,24 +59,26 @@ def tts_guide(text: str):
     """
     print(f"[TTS 안내]: {text}")
 
-# 9.3 사용자별 히스토리 저장
+# 9.3 사용자별 히스토리 저장 (Streamlit Cloud용 예외처리 포함)
 def save_user_history(user_id: str, data: dict, base_path='./user_histories'):
-    os.makedirs(base_path, exist_ok=True)
-    file_path = os.path.join(base_path, f"{user_id}_history.json")
+    try:
+        os.makedirs(base_path, exist_ok=True)
+        file_path = os.path.join(base_path, f"{user_id}_history.json")
 
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            history = json.load(f)
-    else:
-        history = {}
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                history = json.load(f)
+        else:
+            history = {}
 
-    # 병합 및 중복 최소화
-    history.update(data)
+        history.update(data)
 
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
 
-    return f"사용자 {user_id} 히스토리 저장 완료."
+        return f"✅ 사용자 {user_id} 히스토리 저장 완료."
+    except Exception as e:
+        return f"⚠️ 히스토리 저장 실패: {e}"
 
 # ====================
 # 테스트용 실행 예시
