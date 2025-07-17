@@ -23,6 +23,7 @@ else:
 
 # ⬛ Streamlit Sidebar - 전체 단원 선택
 st.sidebar.title("📚 전체 전략 모듈")
+
 modules = {
     "1. 기본 정보 분석": module_01.run,
     "2. 재무 실적 분석": module_02.run,
@@ -55,13 +56,18 @@ modules = {
     "29. 전략 시나리오 & 시뮬레이션": module_29.run,
     "30. 자기지능 강화 & 메타학습": module_30.run,
 }
+
 selected_module = st.sidebar.selectbox("🧩 단원 선택", list(modules.keys()))
 st.sidebar.markdown("---")
 
 # ⬛ 단원 실행
 st.title("📈 AI 기반 퀀트 전략 시스템")
 st.subheader(f"🔍 현재 실행 중: {selected_module}")
-modules[selected_module]()
+
+try:
+    modules[selected_module]()
+except Exception as e:
+    st.error(f"⚠️ 해당 모듈 실행 중 오류 발생: {e}")
 
 # ⬛ 하단 Footer
 st.markdown("---")
