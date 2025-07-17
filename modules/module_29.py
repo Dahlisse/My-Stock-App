@@ -1,35 +1,33 @@
-# module_29.py
-
 import numpy as np
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
+# 29.1 시나리오 기반 전략 성능 평가
 class ScenarioSimulator:
     def __init__(self, strategy_results: Dict[str, pd.DataFrame]):
         """
         strategy_results: {
-            "strategy_A": pd.DataFrame (with columns: date, return, drawdown, volatility),
-            "strategy_B": ...
+            "strategy_A": pd.DataFrame (columns: date, return, drawdown, volatility),
+            ...
         }
         """
         self.strategy_results = strategy_results
-        self.scenario_results = {}
+        self.scenario_results: Dict[str, Dict[str, Dict[str, float]]] = {}
 
-    def simulate_scenarios(self, scenarios: Dict[str, Dict[str, Any]]):
+    def simulate_scenarios(self, scenarios: Dict[str, Dict[str, Any]]) -> None:
         """
         scenarios: {
-            "High_Inflation": {"conditions": {"CPI": "high", "interest_rate": "high"}, "affected_strategies": [...]},
+            "High_Inflation": {"conditions": {...}, "affected_strategies": [...]},
             ...
         }
         """
         for scenario_name, scenario in scenarios.items():
             results = {}
-            for strat in scenario["affected_strategies"]:
+            for strat in scenario.get("affected_strategies", []):
                 strat_df = self.strategy_results.get(strat)
-                if strat_df is not None:
+                if strat_df is not None and not strat_df.empty:
                     mdd = strat_df['drawdown'].max()
                     avg_return = strat_df['return'].mean()
                     results[strat] = {
@@ -45,48 +43,60 @@ class ScenarioSimulator:
                 matrix.append({
                     "Scenario": scenario,
                     "Strategy": strat,
-                    "AvgReturn": metrics["avg_return"],
-                    "MDD": metrics["mdd"]
+                    "AvgReturn": metrics.get("avg_return"),
+                    "MDD": metrics.get("mdd")
                 })
         return pd.DataFrame(matrix)
 
-    def visualize_scenario_matrix(self):
+    def visualize_scenario_matrix(self) -> None:
         df = self.get_scenario_matrix()
+        if df.empty:
+            print("No scenario data to visualize.")
+            return
         pivot = df.pivot(index="Strategy", columns="Scenario", values="AvgReturn")
-        pivot.plot(kind="bar", figsize=(12,6), title="Scenario vs Strategy Performance")
+        pivot.plot(kind="bar", figsize=(12, 6), title="Scenario vs Strategy Performance")
         plt.ylabel("Average Return")
         plt.tight_layout()
         plt.show()
 
 
+# 29.2 전략 혼합 시뮬레이션
 class StrategyMixSimulator:
     def __init__(self, strategies: Dict[str, pd.DataFrame]):
         self.strategies = strategies
 
-    def simulate_mix(self, weights: Dict[str, float]):
+    def simulate_mix(self, weights: Dict[str, float]) -> pd.Series:
         returns_list = []
         for name, weight in weights.items():
-            df = self.strategies[name]
+            df = self.strategies.get(name)
+            if df is None or 'return' not in df:
+                raise ValueError(f"Strategy '{name}' is missing or invalid.")
             weighted_return = df['return'] * weight
             returns_list.append(weighted_return)
         combined_returns = sum(returns_list)
         cumulative_return = (1 + combined_returns).cumprod() - 1
         return cumulative_return
 
-    def optimize_allocation(self):
-        # Dummy optimization: equally weighted (replace with actual optimizer later)
+    def optimize_allocation(self) -> Dict[str, float]:
+        # Dummy optimizer (equal weight)
         n = len(self.strategies)
-        return {k: 1/n for k in self.strategies}
+        if n == 0:
+            return {}
+        return {k: 1.0 / n for k in self.strategies}
 
 
+# 29.3 이벤트 기반 전략 전환 시스템
 class EventBasedSwitcher:
     def __init__(self):
         self.graph = nx.DiGraph()
 
-    def add_trigger(self, condition: str, from_strategy: str, to_strategy: str):
+    def add_trigger(self, condition: str, from_strategy: str, to_strategy: str) -> None:
         self.graph.add_edge(from_strategy, to_strategy, label=condition)
 
-    def visualize_strategy_map(self):
+    def visualize_strategy_map(self) -> None:
+        if self.graph.number_of_nodes() == 0:
+            print("No strategy transition defined.")
+            return
         pos = nx.spring_layout(self.graph)
         plt.figure(figsize=(10, 6))
         nx.draw(self.graph, pos, with_labels=True, node_color='skyblue', node_size=2000, font_size=10, font_weight='bold')
@@ -95,16 +105,16 @@ class EventBasedSwitcher:
         plt.title("Event-Based Strategy Flow")
         plt.show()
 
-    def simulate_transition(self, current_strategy: str, trigger_event: str):
+    def simulate_transition(self, current_strategy: str, trigger_event: str) -> str:
         for u, v, data in self.graph.edges(data=True):
-            if u == current_strategy and data["label"] == trigger_event:
+            if u == current_strategy and data.get("label") == trigger_event:
                 return v
-        return current_strategy  # No change
+        return current_strategy
 
 
-# Example Usage
+# 예제 실행 (단독 실행 시 테스트용)
 if __name__ == "__main__":
-    # Dummy strategy results
+    # 더미 전략 수익률 생성
     dates = pd.date_range("2023-01-01", periods=100)
     strategy_A = pd.DataFrame({
         "date": dates,
@@ -120,13 +130,13 @@ if __name__ == "__main__":
         "volatility": np.random.uniform(0.01, 0.025, size=100)
     })
 
-    # 전략별 시뮬레이션
+    # 전략 등록
     strategies = {
         "Strategy_A": strategy_A,
         "Strategy_B": strategy_B
     }
 
-    # 29.1 시나리오별 전략 시뮬레이션
+    # 시나리오별 전략 평가
     scenario_simulator = ScenarioSimulator(strategies)
     scenario_simulator.simulate_scenarios({
         "High_Inflation": {
@@ -140,17 +150,17 @@ if __name__ == "__main__":
     })
     scenario_simulator.visualize_scenario_matrix()
 
-    # 29.2 전략 조합 시뮬레이션
+    # 전략 혼합 평가
     mix_simulator = StrategyMixSimulator(strategies)
     weights = {"Strategy_A": 0.6, "Strategy_B": 0.4}
-    result = mix_simulator.simulate_mix(weights)
-    result.plot(title="Mixed Strategy Cumulative Return", figsize=(10, 4))
+    cumulative = mix_simulator.simulate_mix(weights)
+    cumulative.plot(title="Mixed Strategy Cumulative Return", figsize=(10, 4))
     plt.show()
 
-    # 29.3 이벤트 기반 전략 전환 시뮬레이션
+    # 이벤트 기반 전략 전환 테스트
     switcher = EventBasedSwitcher()
     switcher.add_trigger("VIX > 30", "Strategy_A", "Strategy_B")
     switcher.add_trigger("Interest Rate Hike", "Strategy_B", "Strategy_A")
     switcher.visualize_strategy_map()
     next_strategy = switcher.simulate_transition("Strategy_A", "VIX > 30")
-    print("Transitioned Strategy:", next_strategy)
+    print("📌 Transitioned Strategy:", next_strategy)
