@@ -1,0 +1,123 @@
+[app]
+title = "AI 기반 자산관리 통합 시스템"
+version = "1.0.0"
+description = "1~30단원 통합 퀀트 전략 시스템"
+theme = "light"  # 또는 "dark"
+default_device_mode = "auto"  # mobile / desktop / auto
+
+[logging]
+log_level = "INFO"
+log_to_file = true
+log_file_path = "logs/system.log"
+
+[data]
+data_source = "korea_invest_api"
+update_interval_minutes = 60
+use_cache = true
+cache_expiry_minutes = 30
+max_stock_universe = 3000
+default_risk_free_rate = 0.035
+
+[api_keys]
+fmp_api = "YOUR_FMP_API_KEY"
+news_api = "YOUR_NEWS_API_KEY"
+korea_invest_api = "YOUR_KIS_API_KEY"
+
+[modules]
+enable_macro_module = true
+enable_sentiment_module = true
+enable_risk_module = true
+enable_auto_strategy_switching = true
+enable_real_time_backtest = true
+enable_scenario_simulation = true
+enable_user_learning_feedback = true
+enable_strategy_generator = true
+enable_ai_strategy_co_creation = true
+
+[ui]
+responsive_layout = true
+enable_touch_support = true
+enable_sidebar_collapse = true
+show_device_banner = true
+show_strategy_complexity_score = true
+default_language = "ko"
+plot_style = "seaborn"
+
+[backtest]
+default_start = "2018-01-01"
+default_end = "2025-07-01"
+default_initial_cash = 100000000
+slippage = 0.001
+commission = 0.00015
+max_drawdown_limit = 0.30
+enable_parallel = true
+use_njit = true
+
+[strategy]
+default_entry = "RSI < 30 and MACD_cross_up"
+default_exit = "RSI > 70 or stop_loss"
+stop_loss_default = 0.1
+take_profit_default = 0.3
+use_auto_condition_validator = true
+allow_strategy_branches = true
+enable_meta_filtering = true
+auto_label_type = "growth/value/momentum"
+max_strategy_complexity = 5
+
+[macro]
+track_indicators = ["CPI", "PMI", "금리", "실업률", "환율", "유가", "VIX"]
+enable_macro_tagging = true
+enable_macro_scenario_split = true
+macro_scenario_memory_depth = 12  # in months
+
+[ai]
+model = "gpt-4o"
+temperature = 0.3
+enable_feedback_loop = true
+auto_simplify_if_overfit = true
+allow_user_choice_in_loop = true
+recommend_stoploss_if_missing = true
+
+[meta_learning]
+enable_self_diagnosis = true
+enable_emotion_analysis = true
+track_investor_bias = true
+investor_profile_vectorize = true
+show_cognitive_type = true
+auto_strategy_philosophy = true
+philosophy_card_output = true
+
+[device]
+adjust_ui_by_device = true
+adjust_complexity_by_device = true
+mobile_max_condition_complexity = 3
+desktop_max_condition_complexity = 7
+
+[visualization]
+enable_flow_diagram = true
+enable_heatmap = true
+enable_timeline = true
+highlight_error_periods = true
+show_recovery_speed = true
+risk_return_diagram = true
+
+[simulation]
+enable_multiscenario = true
+default_scenarios = ["금리상승", "환율하락", "지정학리스크"]
+enable_combination_simulation = true
+enable_event_based_branching = true
+enable_strategy_map_display = true
+default_strategy_allocation = { A = 40, B = 35, C = 25 }
+
+[user]
+track_behavior = true
+track_judgment_history = true
+enable_leaderboard = true
+privacy_level = "high"
+
+[export]
+enable_pdf_report = true
+enable_markdown_export = true
+report_include_modules = [1, 2, 3, 4, 5, 6, 14, 28, 30]
+report_auto_summarize = true
+report_strategy_philosophy = true
