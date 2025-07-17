@@ -1,5 +1,4 @@
 import streamlit as st
-import importlib
 import toml
 import os
 from modules.modules_device_detector import detect_device
@@ -13,15 +12,24 @@ from modules import (
 )
 
 # ⬛ Config & State Initialization
-config = toml.load("config.toml")
-st.set_page_config(page_title="AI 전략 시스템", layout="wide")
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.toml")
+config = toml.load(CONFIG_PATH)
+st.session_state.config = config
+
+st.set_page_config(page_title="AI 전략 시스템", page_icon="📊", layout="wide")
 
 # ⬛ 디바이스 기반 레이아웃 설정
 device = detect_device()
-if device == 'mobile':
-    st.markdown("<style>body { font-size: 14px; }</style>", unsafe_allow_html=True)
-else:
-    st.markdown("<style>body { font-size: 18px; }</style>", unsafe_allow_html=True)
+st.markdown(
+    f"""
+    <style>
+        html, body, [class*="css"] {{
+            font-size: {"14px" if device == "mobile" else "18px"} !important;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # ⬛ Streamlit Sidebar - 전체 단원 선택
 st.sidebar.title("📚 전체 전략 모듈")
@@ -63,7 +71,10 @@ st.sidebar.markdown("---")
 # ⬛ 단원 실행
 st.title("📈 AI 기반 퀀트 전략 시스템")
 st.subheader(f"🔍 현재 실행 중: {selected_module}")
-modules[selected_module]()
+try:
+    modules[selected_module]()
+except Exception as e:
+    st.error(f"❗ 오류 발생: {e}")
 
 # ⬛ 하단 Footer
 st.markdown("---")
