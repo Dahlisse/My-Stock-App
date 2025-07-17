@@ -1,4 +1,5 @@
 # module_11.py
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,10 +10,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from module_04 import simulate_strategy_once
-from module_06 import evaluate_strategy_stability
+# from module_06 import evaluate_strategy_stability  # 현재 미사용 → 향후 활용 가능
 
 class MassiveBacktester:
-    def __init__(self, strategy_fn, scenario_generator, max_runs=1_000_000):
+    def __init__(self, strategy_fn, scenario_generator, max_runs=100_000):
         self.strategy_fn = strategy_fn
         self.scenario_generator = scenario_generator
         self.max_runs = max_runs
@@ -21,6 +22,8 @@ class MassiveBacktester:
     def _run_single_simulation(self, args):
         scenario = args
         try:
+            # 각 프로세스별 무작위성 보장
+            np.random.seed()  
             result = self.strategy_fn(scenario)
             return result
         except Exception as e:
@@ -28,7 +31,6 @@ class MassiveBacktester:
 
     def run(self, parallel=True):
         print(f"▶️ 시작: 전략 x 시나리오 반복 백테스트 (총 {self.max_runs:,}회)")
-
         scenarios = self.scenario_generator(self.max_runs)
 
         if parallel:
@@ -39,7 +41,9 @@ class MassiveBacktester:
         else:
             self.results = [self._run_single_simulation(s) for s in tqdm(scenarios)]
 
-        self.results = [r for r in self.results if isinstance(r, dict) and "return" in r]
+        self.results = [
+            r for r in self.results if isinstance(r, dict) and "return" in r and not "error" in r
+        ]
         print(f"✅ 완료: 유효 결과 {len(self.results):,}건 저장됨")
         return pd.DataFrame(self.results)
 
@@ -103,7 +107,7 @@ def sample_scenario_generator(n):
     for _ in range(n):
         scenarios.append({
             "start_date": np.random.choice(["2015-01-01", "2018-01-01", "2020-01-01"]),
-            "duration": np.random.choice([252, 504, 756]),  # 1년, 2년, 3년
+            "duration": np.random.choice([252, 504, 756]),
             "volatility_shift": np.random.uniform(0.8, 1.2),
             "macro": np.random.choice(["low_rate", "high_oil", "recession"]),
         })
@@ -125,7 +129,11 @@ def example_strategy_fn(scenario):
 
 # 실행 예시 (테스트용)
 if __name__ == "__main__":
-    tester = MassiveBacktester(strategy_fn=example_strategy_fn, scenario_generator=sample_scenario_generator, max_runs=5000)
+    tester = MassiveBacktester(
+        strategy_fn=example_strategy_fn,
+        scenario_generator=sample_scenario_generator,
+        max_runs=5000
+    )
     df_results = tester.run()
     tester.summarize_distribution(df_results)
     top_strategies = tester.analyze_survival(df_results)
