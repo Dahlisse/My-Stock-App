@@ -1,5 +1,3 @@
-# module_13.py
-
 import streamlit as st
 import platform
 
@@ -21,8 +19,10 @@ def apply_responsive_layout():
 
 def safari_tts_patch():
     """Safari에서 음성 안내(TTS) 미작동 이슈 대응"""
-    if platform.system() == "Darwin":
-        st.session_state['tts_enabled'] = True  # Safari용 플래그
+    system = platform.system()
+    if system == "Darwin":
+        if 'tts_enabled' not in st.session_state:
+            st.session_state['tts_enabled'] = True
         st.markdown("▶️ iOS Safari 환경에서는 일부 음성 안내가 제한될 수 있습니다. 설정에서 ‘음성 안내 활성화’를 확인하세요.")
 
 def render_navigation_guide(mode="초심자"):
