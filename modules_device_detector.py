@@ -1,5 +1,3 @@
-# modules/modules_device_detector.py
-
 from device_detector import DeviceDetector
 from user_agents import parse
 import streamlit as st
