@@ -1,8 +1,8 @@
-# module_04.py
 import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from datetime import timedelta
 from scipy.stats import norm
@@ -27,14 +27,16 @@ def calc_performance_metrics(df):
 
 # 4.2 수익률 히트맵
 def plot_monthly_heatmap(df):
+    df = df.copy()
     df['Month'] = df.index.to_period('M')
     monthly_returns = df['Portfolio'].resample('M').last().pct_change()
     heatmap_data = monthly_returns.groupby([monthly_returns.index.year, monthly_returns.index.month]).mean().unstack()
-    
+
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax = sns.heatmap(heatmap_data * 100, annot=True, fmt=".1f", cmap="RdYlGn", cbar=False)
-    plt.title("월간 수익률 히트맵 (%)")
+    sns.heatmap(heatmap_data * 100, annot=True, fmt=".1f", cmap="RdYlGn", cbar=False, ax=ax)
+    ax.set_title("월간 수익률 히트맵 (%)")
     st.pyplot(fig)
+    plt.close(fig)
 
 # 4.2 드로우다운 시각화
 def plot_drawdown(df):
@@ -46,6 +48,7 @@ def plot_drawdown(df):
     ax.set_title("📉 드로우다운 (Drawdown)")
     ax.set_ylabel("Drawdown")
     st.pyplot(fig)
+    plt.close(fig)
 
 # 4.2 백테스트 시뮬레이션 (더미)
 def generate_dummy_portfolio(days=500, seed=42):
@@ -69,7 +72,7 @@ def generate_ai_summary(perf: dict, history_years=10):
     return sentence
 
 # 4단원 메인 함수
-def module_04_main(show_details=True):
+def run():
     st.header("📘 4단원. 수익률 시뮬레이션 & 백테스트")
 
     # 사용자 선택: 국내/해외 시장 포함 여부
@@ -84,7 +87,10 @@ def module_04_main(show_details=True):
     # 결과 출력
     st.subheader("✅ 핵심 성과 지표")
     for k, v in perf.items():
-        st.write(f"{k}: {v*100:.2f}%" if '수익률' in k or '낙폭' in k else f"{k}: {v:.2f}")
+        if isinstance(v, float):
+            st.write(f"{k}: {v*100:.2f}%" if '수익률' in k or '낙폭' in k else f"{k}: {v:.2f}")
+        else:
+            st.write(f"{k}: {v}")
 
     # 그래프 시각화
     st.subheader("📈 수익률 곡선")
@@ -93,14 +99,14 @@ def module_04_main(show_details=True):
     st.subheader("📉 드로우다운")
     plot_drawdown(df)
 
-    if show_details:
-        st.subheader("📊 월간 수익률 히트맵")
-        plot_monthly_heatmap(df)
+    st.subheader("📊 월간 수익률 히트맵")
+    plot_monthly_heatmap(df)
 
     st.subheader("🧠 AI 전략 요약")
     st.markdown(generate_ai_summary(perf), unsafe_allow_html=True)
 
     return perf
 
+# 단독 실행용
 if __name__ == "__main__":
-    module_04_main()
+    run()
