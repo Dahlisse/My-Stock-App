@@ -1,4 +1,4 @@
-# modules_device_detector.py
+# modules/modules_device_detector.py
 
 from device_detector import DeviceDetector
 from user_agents import parse
@@ -9,22 +9,40 @@ def detect_device_info(user_agent: str) -> dict:
     """
     사용자 User-Agent 문자열을 바탕으로 장치 정보 분석
     """
-    device = DeviceDetector(user_agent).parse()
-    user_agent_parsed = parse(user_agent)
+    try:
+        device = DeviceDetector(user_agent).parse()
+        user_agent_parsed = parse(user_agent)
 
-    device_info = {
-        "device_type": device.device_type(),  # mobile / tablet / desktop / smarttv / console / car / camera / portable media player
-        "os_name": device.os_name(),          # Windows / Android / iOS / etc.
-        "os_version": device.os_version(),
-        "browser_name": device.client_name(),
-        "browser_version": device.client_version(),
-        "is_mobile": user_agent_parsed.is_mobile,
-        "is_tablet": user_agent_parsed.is_tablet,
-        "is_pc": user_agent_parsed.is_pc,
-        "is_touch_capable": user_agent_parsed.is_touch_capable,
-        "brand": device.brand_name(),         # Apple, Samsung, etc.
-        "model": device.model()
-    }
+        device_info = {
+            "device_type": device.device_type() or "unknown",
+            "os_name": device.os_name() or "unknown",
+            "os_version": device.os_version() or "unknown",
+            "browser_name": device.client_name() or "unknown",
+            "browser_version": device.client_version() or "unknown",
+            "is_mobile": user_agent_parsed.is_mobile,
+            "is_tablet": user_agent_parsed.is_tablet,
+            "is_pc": user_agent_parsed.is_pc,
+            "is_touch_capable": user_agent_parsed.is_touch_capable,
+            "brand": device.brand_name() or "unknown",
+            "model": device.model() or "unknown"
+        }
+
+    except Exception as e:
+        # 분석 실패 시 기본값 반환
+        device_info = {
+            "device_type": "unknown",
+            "os_name": "unknown",
+            "os_version": "unknown",
+            "browser_name": "unknown",
+            "browser_version": "unknown",
+            "is_mobile": False,
+            "is_tablet": False,
+            "is_pc": False,
+            "is_touch_capable": False,
+            "brand": "unknown",
+            "model": "unknown"
+        }
+        st.warning(f"디바이스 정보 분석 실패: {e}")
 
     return device_info
 
@@ -32,7 +50,6 @@ def detect_device_info(user_agent: str) -> dict:
 def get_device_class(device_info: dict) -> str:
     """
     장치 정보에 기반한 사용자 분류
-    - UI/UX 최적화 또는 행동 기반 전략 제안에 사용 가능
     """
     if device_info["is_mobile"]:
         return "mobile"
@@ -47,7 +64,6 @@ def get_device_class(device_info: dict) -> str:
 def render_device_banner(device_info: dict):
     """
     Streamlit 상단에 사용자 장치 요약 정보를 표시
-    - 전략 시각화, 디버깅 시 유저 환경 고려를 위함
     """
     st.markdown("#### 📱 사용자 장치 정보 요약")
     cols = st.columns(2)
@@ -61,9 +77,7 @@ def render_device_banner(device_info: dict):
 
 def device_adjusted_strategy(device_info: dict) -> str:
     """
-    장치에 따라 추천되는 전략 조정 방향을 안내 (30단원 자기지능 루프용)
-    - 모바일: 간결한 전략, 터치 기반 시각화
-    - 데스크탑: 복합전략, 시나리오 병렬 분석
+    장치에 따라 추천되는 전략 조정 방향을 안내
     """
     if device_info["is_mobile"]:
         return "📲 간단하고 직관적인 시각화 중심 전략 권장 (모바일 환경 최적화)"
@@ -77,12 +91,18 @@ def device_adjusted_strategy(device_info: dict) -> str:
 
 # ✅ 앱 상단에서 사용할 통합 실행 예시 함수
 def run_device_detector():
-    user_agent = st.session_state.get("user_agent", None)
-    if user_agent is None:
-        # 개발 환경 또는 수동 입력 fallback
-        user_agent = st.text_input("User Agent 입력", value=st.request_headers.get("User-Agent", "unknown"))
+    st.markdown("### 📡 사용자 디바이스 분석")
 
-    device_info = detect_device_info(user_agent)
+    user_agent_input = st.text_input(
+        "User-Agent 문자열 입력 (자동 감지 실패 시 수동 입력)",
+        value=st.session_state.get("user_agent", "")
+    )
+
+    if not user_agent_input:
+        st.info("📌 User-Agent 문자열을 입력하거나 브라우저에서 자동 제공되도록 설정하세요.")
+        return
+
+    device_info = detect_device_info(user_agent_input)
     render_device_banner(device_info)
     strategy_hint = device_adjusted_strategy(device_info)
     st.success(f"💡 전략 UX 권장: {strategy_hint}")
