@@ -1,5 +1,3 @@
-# module_07.py
-
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -16,12 +14,9 @@ plt.switch_backend('Agg')  # 서버 환경에서도 시각화 가능하도록 �
 # =======================================
 
 def plot_strategy_radar_chart(scores: dict, title="Strategy Profile"):
-    """
-    입력 예시: {"수익성": 85, "안정성": 70, "유연성": 60, "심리적 적합도": 75, "성장성": 90}
-    """
     labels = list(scores.keys())
     values = list(scores.values())
-    values += values[:1]  # 레이더 차트 닫기용
+    values += values[:1]  # 차트 닫기용
 
     angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
     angles += angles[:1]
@@ -72,15 +67,12 @@ def plot_drawdown_curve(dates, portfolio_values):
     return buf
 
 def plot_monthly_heatmap(returns_df):
-    """
-    returns_df: 'Date'와 'Return' 열이 있는 DataFrame (수익률은 월간 기준)
-    """
     returns_df['Year'] = returns_df['Date'].dt.year
     returns_df['Month'] = returns_df['Date'].dt.month
     pivot = returns_df.pivot(index='Year', columns='Month', values='Return')
 
     plt.figure(figsize=(10, 6))
-    sns.heatmap(pivot, cmap='RdYlGn', annot=True, fmt=".1f", linewidths=.5, center=0)
+    sns.heatmap(pivot, cmap='RdYlGn_r', annot=True, fmt=".1f", linewidths=.5, center=0)
     plt.title("월간 수익률 히트맵")
     plt.xlabel("월")
     plt.ylabel("연도")
@@ -97,14 +89,12 @@ def plot_monthly_heatmap(returns_df):
 # =======================================
 
 def plot_strategy_switch_points(dates, returns, switch_points):
-    """
-    switch_points: 전략 전환 시점 날짜 리스트
-    """
-    df = pd.DataFrame({'Date': dates, 'Return': returns})
+    df = pd.DataFrame({'Date': pd.to_datetime(dates), 'Return': returns})
     plt.figure(figsize=(8, 4))
     sns.lineplot(data=df, x='Date', y='Return', label='수익률')
-    for switch_date in switch_points:
-        plt.axvline(pd.to_datetime(switch_date), color='orange', linestyle='--', label='전략 전환')
+    for idx, switch_date in enumerate(switch_points):
+        plt.axvline(pd.to_datetime(switch_date), color='orange', linestyle='--',
+                    label='전략 전환' if idx == 0 else None)
     plt.title("전략 전환 시점 및 수익률")
     plt.xlabel("날짜")
     plt.ylabel("누적 수익률 (%)")
@@ -136,7 +126,7 @@ class StrategyReportPDF(FPDF):
         self.multi_cell(0, 7, text)
 
     def add_image_stream(self, img_buf, w=180):
-        self.image(img_buf, x=None, y=None, w=w)
+        self.image(img_buf, x=10, y=None, w=w)
         self.ln(5)
 
 def generate_strategy_pdf_report(output_path, summary_text, radar_buf, return_buf, dd_buf, switch_buf, heatmap_buf):
@@ -169,7 +159,7 @@ def generate_strategy_pdf_report(output_path, summary_text, radar_buf, return_bu
 if __name__ == "__main__":
     import random
     date_range = pd.date_range(start="2022-01-01", periods=500, freq="D")
-    returns = np.cumsum(np.random.randn(500))  # 누적 수익률 예시
+    returns = np.cumsum(np.random.randn(500))
     portfolio_values = np.cumprod(1 + np.random.normal(0.001, 0.01, 500))
 
     radar_scores = {
