@@ -1,5 +1,3 @@
-# module_28.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -9,6 +7,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 import uuid
 import json
+import os
+import warnings
 
 # ==========================================
 # 1. 전략 설계 인터페이스
@@ -31,8 +31,8 @@ def strategy_builder_ui():
 
     return {
         "indicators": selected_indicators,
-        "entry": entry_cond,
-        "exit": exit_cond,
+        "entry": entry_cond.strip(),
+        "exit": exit_cond.strip(),
         "target": target_return,
         "drawdown": max_drawdown
     }
@@ -41,6 +41,10 @@ def strategy_builder_ui():
 # 2. 전략 복잡도 해석 및 시각화
 # ==========================================
 def visualize_strategy_logic(entry, exit):
+    if not entry or not exit:
+        st.info("📌 전략 조건을 입력해야 시각화가 가능합니다.")
+        return
+
     G = nx.DiGraph()
     G.add_node("START")
     G.add_node("ENTRY")
@@ -53,26 +57,37 @@ def visualize_strategy_logic(entry, exit):
     nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=3000, font_size=10)
     edge_labels = nx.get_edge_attributes(G, 'label')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-    st.pyplot(plt)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        st.pyplot(plt.gcf())
+    plt.clf()
 
 # ==========================================
 # 3. 자동 조건 검증 및 경고 시스템
 # ==========================================
 def check_condition_validity(entry_cond):
-    # 단순 조건 복잡도 기준 → 실제로는 시뮬레이션 연동 필요
-    logic_depth = entry_cond.count("and") + entry_cond.count("or") + 1
+    if not entry_cond:
+        st.info("📌 진입 조건을 입력하면 복잡도 검토가 가능합니다.")
+        return
+
+    logic_depth = entry_cond.lower().count("and") + entry_cond.lower().count("or") + 1
     if logic_depth >= 4:
-        st.warning(f"⚠️ 조건이 과도하게 엄격할 수 있습니다. 진입 가능성 {5 * (6 - logic_depth)}% 미만 예상")
+        st.warning(f"⚠️ 조건이 복잡할 수 있습니다. 진입 가능성 {max(5, 5 * (6 - logic_depth))}% 이하로 예상됨")
 
 # ==========================================
 # 4. AI 기반 전략 보완 시스템
 # ==========================================
 def suggest_improvements(strategy):
     suggestions = []
-    if "Stop" not in strategy["exit"]:
+
+    if not strategy["exit"]:
+        suggestions.append("청산 조건이 비어 있습니다. 기본적인 Exit 전략을 추가하세요.")
+    elif "stop" not in strategy["exit"].lower():
         suggestions.append("Stop loss 조건 추가를 고려해보세요.")
+
     if strategy["target"] > 30 and strategy["drawdown"] < 10:
-        suggestions.append("수익률 목표 대비 손실 허용 폭이 너무 작을 수 있습니다.")
+        suggestions.append("목표 수익률 대비 허용 손실폭이 작을 수 있습니다.")
 
     if suggestions:
         st.subheader("🤖 AI 전략 보완 제안")
@@ -85,17 +100,21 @@ def suggest_improvements(strategy):
 # 5. 전략 저장 및 재사용 기능
 # ==========================================
 def save_strategy(strategy):
-    filename = f"strategy_{uuid.uuid4().hex[:6]}.json"
-    with open(filename, 'w') as f:
-        json.dump(strategy, f)
-    st.success(f"✅ 전략이 저장되었습니다: {filename}")
+    try:
+        os.makedirs("saved_strategies", exist_ok=True)
+        filename = f"saved_strategies/strategy_{uuid.uuid4().hex[:6]}.json"
+        with open(filename, "w") as f:
+            json.dump(strategy, f, indent=4)
+        st.success(f"✅ 전략이 저장되었습니다: {filename}")
+    except Exception as e:
+        st.error(f"❌ 저장 중 오류 발생: {e}")
 
 # ==========================================
 # Main Entrypoint
 # ==========================================
 def run_self_driven_strategy_designer():
     strategy = strategy_builder_ui()
-    
+
     st.subheader("🧠 전략 논리 시각화")
     visualize_strategy_logic(strategy["entry"], strategy["exit"])
 
