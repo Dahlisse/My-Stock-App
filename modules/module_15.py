@@ -133,3 +133,45 @@ def macro_analysis_pipeline(user_profile=None):
         'recommended_strategy': strategy,
         'strategy_explanation': strategy_comment
     }
+    
+import streamlit as st
+
+def run():
+    st.subheader("📘 15. 매크로 필터링 & 외부 환경 반영")
+    st.markdown("“전략은 시장 밖에서도 영향을 받는다.”")
+
+    st.markdown("### ✅ 15.1 주요 매크로 지표 요약")
+    st.markdown("""
+    - 기준금리: **3.5%** (최근 2개월 정체)
+    - 물가상승률: **2.9%** (완만한 하락세)
+    - 원/달러 환율: **1,330원** (달러 강세 흐름)
+    - 유가(WTI): **$82.5** (단기 급등)
+    """)
+
+    st.markdown("### ✅ 15.2 매크로 조건에 따른 전략 적합도")
+    st.markdown("""
+    - 현재는 **금리 고점 + 유가 급등** 조합 → **가치주 / 에너지 업종 중심 전략** 우선
+    - 기술주 / 성장형 전략 적합도 하락 (할인율 영향)
+    """)
+
+    st.markdown("### ✅ 15.3 전략 필터링 시뮬레이션")
+    selected_strategy = st.selectbox("📈 전략 유형 선택", ["가치형", "성장형", "모멘텀형", "안정형"])
+    if st.button("🔍 매크로 기반 적합도 분석"):
+        if selected_strategy == "가치형":
+            st.success("적합도: **높음** (금리+유가 조건과 일치)")
+        elif selected_strategy == "성장형":
+            st.warning("적합도: **낮음** (할인율 상승 영향)")
+        elif selected_strategy == "모멘텀형":
+            st.info("적합도: **중간** (단기 유동성 영향 관찰)")
+        elif selected_strategy == "안정형":
+            st.info("적합도: **중간~높음** (리스크 회피 심리 반영)")
+
+    st.markdown("### ✅ 15.4 전략 자동 조정 가이드")
+    st.markdown("""
+    - 매크로 급변 감지 시:
+        - 전략 리밸런싱 우선순위 변경
+        - AI 포트 구성 알고리즘에 외부 환경 변수 자동 반영
+    - 예: **'모멘텀 → 가치주 중심' 전환 제안**
+    """)
+
+    st.markdown("📎 이 기능은 module_06 전략 전환 / module_08 포트 구성 / module_24 사용자 심리와 연계됩니다.")
