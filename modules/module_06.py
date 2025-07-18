@@ -1,16 +1,13 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-
 from sklearn.preprocessing import MinMaxScaler
-
 
 # 대체 variation 함수 (scipy 없이도 작동)
 def safe_variation(series):
     mean = np.mean(series)
     std = np.std(series)
     return std / mean if mean != 0 else 0
-
 
 # 6.1 전략 제안
 def suggest_strategy(fin_metrics, perf_metrics, sentiment_score, macro_vars):
@@ -29,7 +26,6 @@ def suggest_strategy(fin_metrics, perf_metrics, sentiment_score, macro_vars):
         return "🛡 안정형"
     else:
         return "⚡ 모멘텀형"
-
 
 # 6.2 전략 전환 감지
 def detect_strategy_shift(portfolio_returns, sentiment_series, macro_df):
@@ -55,7 +51,6 @@ def detect_strategy_shift(portfolio_returns, sentiment_series, macro_df):
 
     return trigger, round(stability, 2), " + ".join(reason)
 
-
 # 6.3 전략 비교
 def compare_strategies(results: list):
     df = pd.DataFrame(results)
@@ -72,7 +67,6 @@ def compare_strategies(results: list):
     df["종합점수"] = df[norm_cols].mean(axis=1)
     return df.sort_values("종합점수", ascending=False)
 
-
 # 전략 해설
 def explain_strategy(name, score_row):
     return (
@@ -83,7 +77,6 @@ def explain_strategy(name, score_row):
         f"- 전략 안정성 지표: {score_row['전략안정성']:.2f}\n\n"
         f"👉 종합 판단: 이 전략은 현재 시장에 **{'잘 적합' if score_row['종합점수'] > 0.6 else '위험 요소 존재'}**합니다."
     )
-
 
 # 메인 함수
 def module_06_main():
@@ -130,7 +123,6 @@ def module_06_main():
     for _, row in result_df.iterrows():
         st.markdown(explain_strategy(row["전략명"], row))
 
-
-# Streamlit 클라우드에선 entrypoint에서 호출되므로 유지
+# Streamlit 클라우드용 엔트리포인트
 if __name__ == "__main__":
     module_06_main()
