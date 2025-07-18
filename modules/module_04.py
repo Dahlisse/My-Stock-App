@@ -110,3 +110,53 @@ def run():
 # 단독 실행용
 if __name__ == "__main__":
     run()
+    
+import streamlit as st
+
+# 만약 실제 백테스트나 시뮬레이션 함수가 별도로 존재한다면 아래에서 import
+# from .simulation_core import run_backtest_simulation, analyze_performance
+
+def run():
+    st.subheader("📘 4단원. 수익률 시뮬레이션 & 백테스트")
+    
+    st.markdown("### ✅ 4.1 성과 분석 지표")
+    st.markdown("""
+    - 누적 수익률, 연환산 수익률  
+    - 최대 낙폭(MDD), Sharpe, Calmar  
+    - 월간 수익률 히트맵, 수익률 분산도  
+    - 드로우다운 그래프 시각화
+    """)
+
+    st.markdown("### ⚙️ 4.2 시뮬레이션 실행")
+    st.markdown("""
+    - 종목을 수동 입력하지 않아도 AI가 자동으로 포트를 구성하고 백테스트를 실행합니다.  
+    - 사용자는 아래에서 **국내 / 해외 포함 여부**를 선택합니다.
+    """)
+
+    # 사용자 선택
+    include_foreign = st.radio("해외 주식 포함 여부", ["국내만", "국내 + 해외"])
+
+    if st.button("🚀 시뮬레이션 시작"):
+        st.info(f"선택한 옵션: {include_foreign}")
+
+        # 여기에 백테스트 실행 함수 연결
+        # 예: results = run_backtest_simulation(include_foreign)
+
+        # 성과 결과 예시 (임시 출력)
+        st.success("시뮬레이션 완료 ✅")
+        st.metric("누적 수익률", "124.7%")
+        st.metric("Sharpe Ratio", "1.42")
+        st.metric("최대 낙폭 (MDD)", "-15.3%")
+
+        st.markdown("📊 [성과 분석 그래프 삽입 예정]")
+        # 예: st.pyplot(draw_performance_graph(results))
+
+    st.markdown("### 🤖 4.3 AI 해석 및 전략 평가")
+    st.markdown("""
+    - 예측 vs 실현 수익률 오차 분석  
+    - 전략 신뢰도 스코어 출력  
+    - 자연어 요약 예:  
+        > “이 전략은 지난 10년 중 8년 수익 발생, 평균 연 13.2% 수익률 기록”
+    """)
+
+    st.warning("⚠️ 전체 전략 리밸런싱 결과는 module_06과 연계되어 추가 평가가 가능합니다.")
