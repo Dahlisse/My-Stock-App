@@ -140,3 +140,79 @@ def app_main():
 # ✅ 메인 실행
 if __name__ == "__main__":
     app_main()
+    
+import streamlit as st
+
+def run():
+    st.subheader("📘 10단원. 완성형 코드화 구조")
+    st.markdown("“템플릿이 아니라 실제 작동하는 실전용 AI 앱을 만든다.”")
+
+    # ───────────────────────────────
+    st.markdown("### 🧱 10.1 모듈별 완전 작동 코드화")
+
+    st.markdown("""
+    - `portfolio.py`: 포트 구성 로직  
+    - `backtest.py`: 전략별 수익률/리스크 백테스트  
+    - `user_profile.py`: 사용자 성향 분석  
+    - `voice_guide.py`: 음성 안내 (TTS) 시스템  
+    - 기능별 핵심 로직을 완전 작동 가능한 형태로 구현
+    """)
+
+    st.code("""
+📁 core/
+ ┣ portfolio.py
+ ┣ backtest.py
+ ┣ user_profile.py
+ ┗ voice_guide.py
+    """, language='text')
+
+    st.divider()
+
+    # ───────────────────────────────
+    st.markdown("### 🧩 10.2 코드 최적화 & 재사용성 구조화")
+
+    st.markdown("""
+    - Class, 함수 분리 → 중복 최소화  
+    - 백엔드 로직 ↔ Streamlit UI 분리  
+    - 추천 엔진 / 시각화 / 매크로 모듈 독립 구성  
+    - 핵심 기능은 API-like 구조로 설계
+    """)
+
+    st.info("예: `run_backtest(strategy, portfolio)` → UI와 분리된 백테스트 함수")
+
+    st.divider()
+
+    # ───────────────────────────────
+    st.markdown("### 🔧 10.3 중복 제거 및 예외 핸들링 구조 강화")
+
+    st.markdown("""
+    - `yfinance`, `OpenDart`, `KRX` → 다중 데이터 백업 경로 구성  
+    - 종목 누락 / API 실패 시 자동 대체 및 로그 기록  
+    - 사용자에게는 최소한의 오류만 노출 (UX 보호)
+    """)
+
+    st.warning("예: `삼성전자` 재무데이터 누락 → KRX 데이터로 자동 대체 → UI에는 정상 출력")
+
+    st.success("모든 예외 처리는 `utils/error_handler.py`에 집중 관리 가능")
+
+    st.divider()
+
+    # ───────────────────────────────
+    st.markdown("✅ 전체 구조 요약")
+
+    st.markdown("""
+    - 각 모듈은 Streamlit ↔ 백엔드 인터페이스가 명확히 구분됨  
+    - 사용자 입력 → 전략 분석 → 시각화 → 리포트까지 자동 흐름 구성  
+    - 실제 운용 가능한 투자 분석 앱 형태로 완성도 높임
+    """)
+
+    st.code("""
+📁 modules/
+ ┣ module_01 ~ module_10.py
+📁 core/
+ ┣ portfolio.py, backtest.py ...
+📁 utils/
+ ┣ error_handler.py, helpers.py
+    """, language='text')
+
+    st.success("10단원은 전체 앱 구조의 안정성과 유지보수성을 책임지는 핵심 축입니다.")
