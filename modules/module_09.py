@@ -118,3 +118,65 @@ if __name__ == "__main__":
     }
     save_msg = save_user_history('user123', user_data)
     print(save_msg)
+    
+import streamlit as st
+import pandas as pd
+import time
+
+def run():
+    st.subheader("📘 9단원. 실행 추적 & AI 내비게이션")
+    st.markdown("“투자는 지속적인 흐름이다. 안내와 추적까지 포함해야 한다.”")
+
+    # ───────────────────────────────
+    st.markdown("### 📡 9.1 실시간 전략 추적")
+
+    st.markdown("""
+    - 📊 **포트 수익률**: 실시간 반영  
+    - 🚨 **성과 이탈 경고**: 수익률 -5% 이상 or 변동성 급등 시  
+    - ⏱️ 주요 알림만 표시 (알람 과다 방지)
+    """)
+
+    # 예시 실시간 수익률 시뮬레이션
+    st.write("🔄 실시간 수익률 추적 (예시)")
+    progress_bar = st.progress(0)
+    for i in range(0, 101, 20):
+        progress_bar.progress(i)
+        time.sleep(0.1)
+    st.success("현재 수익률: +3.7% | 변동성: 안정적")
+
+    st.divider()
+
+    # ───────────────────────────────
+    st.markdown("### 🧭 9.2 행동 안내 내비게이션")
+
+    st.markdown("""
+    - 매수/매도 권고 시점 자동 감지  
+    - 자연어 기반 간결 가이드  
+    - ✅ 초보자용 '간단 모드' 지원  
+    - 📱 Safari 대응 및 음성 안내(TTS) 옵션 포함
+    """)
+
+    st.info("예시 안내: **“지금은 매수 자제 → 2주 뒤 재진입”**")
+
+    st.divider()
+
+    # ───────────────────────────────
+    st.markdown("### 🗂️ 9.3 사용자별 히스토리 저장")
+
+    st.markdown("""
+    - 과거 종목 구성, 전략 점수, 수익률 로그 보존  
+    - 사용자 구분: 예) 나 / 배우자 / 부모님  
+    - 중복 저장 방지 및 요약 위주 저장
+    """)
+
+    sample_history = pd.DataFrame({
+        "날짜": ["2025-07-01", "2025-07-10"],
+        "전략": ["AI 최적화형", "공격 수익형"],
+        "수익률": [3.4, 5.1],
+        "심리 점수": [0.78, 0.82]
+    })
+
+    st.markdown("📅 **최근 전략 기록**")
+    st.dataframe(sample_history, use_container_width=True)
+
+    st.success("사용자 히스토리는 module_24와 연동되어 심리 기반 전략 조정에 활용됩니다.")
