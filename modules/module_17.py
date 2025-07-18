@@ -99,3 +99,56 @@ def run_strategy_comparator(strategies_data, user_type='중립형', bias_type=No
             'explanation': None,
             'leader_flow': None
         }
+        
+import streamlit as st
+import matplotlib.pyplot as plt
+
+def run():
+    st.subheader("📘 17. 트레이드오프 분석 시각화")
+    st.markdown("“수익률만 보는 시대는 끝났다. 리스크를 감안해야 진짜 실력이다.”")
+
+    st.markdown("### ✅ 17.1 전략 간 수익률 vs 리스크 맵")
+    st.markdown("아래 그래프는 전략별 연평균 수익률과 변동성을 시각화한 것입니다.")
+
+    strategies = ["A(성장형)", "B(가치형)", "C(안정형)", "D(모멘텀형)"]
+    returns = [12.5, 9.1, 7.0, 11.3]
+    risks = [18.2, 12.7, 9.3, 15.4]
+
+    fig, ax = plt.subplots()
+    ax.scatter(risks, returns)
+
+    for i, strategy in enumerate(strategies):
+        ax.annotate(strategy, (risks[i]+0.3, returns[i]+0.3))
+
+    ax.set_xlabel("변동성 (%)")
+    ax.set_ylabel("연평균 수익률 (%)")
+    ax.set_title("전략별 수익률 vs 리스크 비교")
+    st.pyplot(fig)
+
+    st.markdown("### ✅ 17.2 성장성 vs 안정성 비교")
+    st.markdown("아래는 전략별 성장성 지표(ROE 등)와 안정성 지표(Stability Index)를 비교한 그래프입니다.")
+
+    growth_scores = [8.2, 5.9, 4.1, 7.3]
+    stability_scores = [0.52, 0.71, 0.83, 0.48]
+
+    fig2, ax2 = plt.subplots()
+    ax2.scatter(growth_scores, stability_scores, color='green')
+
+    for i, strategy in enumerate(strategies):
+        ax2.annotate(strategy, (growth_scores[i]+0.1, stability_scores[i]+0.01))
+
+    ax2.set_xlabel("성장성 지표 (평균 ROE 등급)")
+    ax2.set_ylabel("전략 안정성 지표 (0~1)")
+    ax2.set_title("전략별 성장성 vs 안정성")
+    st.pyplot(fig2)
+
+    st.markdown("### ✅ 17.3 전략 선택 가이드")
+    st.markdown("""
+    - 📈 **공격형 사용자**: 성장성 우선 (예: 전략 A, D)
+    - 🛡 **보수형 사용자**: 안정성 우선 (예: 전략 C)
+    - ⚖ **균형형 사용자**: B 전략 적합
+
+    👉 *전략 선택은 module_24 사용자 성향 분석을 기반으로 자동 제안될 수 있습니다.*
+    """)
+
+    st.markdown("📎 이 시각화는 module_06(전략), module_08(포트 구성), module_16(리스크 분석)과 연동됩니다.")
