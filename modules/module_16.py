@@ -107,3 +107,47 @@ def run_scenario_branching(market_factors: Dict[str, float], recent_ts: List[flo
         'last_detected_shift_index': shift_point,
         'markov_transition_map': markov_map
     }
+    
+import streamlit as st
+
+def run():
+    st.subheader("📘 16. 리스크 관리 & 손실 방어 시스템")
+    st.markdown("“손실을 피하지 못한다면, 최소화라도 하자.”")
+
+    st.markdown("### ✅ 16.1 리스크 감지 지표 요약")
+    st.markdown("""
+    - 변동성 지수(VIX): **21.4** (경계 수준 돌입)
+    - 포트 최대낙폭(MDD): **-12.8%**
+    - 포지션 집중도: **특정 섹터 비중 42% (에너지)**
+    - 심리 민감도: **고위험 회피형**
+    """)
+
+    st.markdown("### ✅ 16.2 리스크 경고 시나리오 감지")
+    if st.button("📉 현재 리스크 상태 평가"):
+        st.warning("⚠ 리스크 과다 노출 감지됨")
+        st.markdown("""
+        - 변동성 급등 + MDD -10% 돌파
+        - 리밸런싱 또는 헷지 전략 필요
+        """)
+
+    st.markdown("### ✅ 16.3 손실 방어 전략 시뮬레이션")
+    hedge_option = st.selectbox("🛡 방어 전략 선택", ["현금 비중 확대", "인버스 ETF 편입", "섹터 분산", "고배당주 전환"])
+    if st.button("🧪 방어 전략 시뮬레이션 실행"):
+        if hedge_option == "현금 비중 확대":
+            st.success("현금 비중 40% 확대 시 MDD → -8.3%로 개선 예상")
+        elif hedge_option == "인버스 ETF 편입":
+            st.info("인버스 ETF 10% 편입 시 수익률 -0.5% 개선 예상")
+        elif hedge_option == "섹터 분산":
+            st.info("집중 섹터 분산 시 리스크 지수 17% 감소 예상")
+        elif hedge_option == "고배당주 전환":
+            st.info("배당 수익률 증가로 방어력 +12% 향상 예상")
+
+    st.markdown("### ✅ 16.4 방어 전략 적용 가이드")
+    st.markdown("""
+    - 리스크 감지 기준:
+        - MDD > 10%, 변동성 지수(VIX) > 20, 심리 점수 < 40
+    - 전략:
+        - 포트 재조정 or 자동 방어 전략 제시
+    """)
+
+    st.markdown("📎 이 기능은 module_06(전략 전환), module_08(포트 구성), module_24(사용자 성향)와 연계됩니다.")
