@@ -136,3 +136,27 @@ def run_module_20(df):
         'return_analysis': return_analysis,
         'predicted_signals': signal_df
     }
+    
+import streamlit as st
+
+def run():
+    st.header("📘 20단원. 진입/청산 예측 모델링 시스템")
+    st.markdown("""
+    “시간이 곧 수익이다. 예측은 기회보다 정확도다.”
+
+    - 20.1 진입/청산 라벨링 구조 정교화  
+      기술지표 기반 라벨링 (MACD, RSI 등)  
+      지연/누수 방지, 실거래 시점 반영  
+      가격 행동 기반 비정형 라벨 추가
+
+    - 20.2 예측 모델 구조 비교 및 선택 가이드  
+      트리(XGBoost), 순환(LSTM), Transformer 비교  
+      전략 실행 기준 평가 (정확도 + 수익률)  
+      슬리피지, 거래비용 포함 손익률 계산
+
+    - 20.3 예측 vs 실현 결과 해석 시스템  
+      예측 성공 확률 vs 실제 수익 비교  
+      보유 기간별 평균 기대 수익 분석  
+      실패 케이스 분류 (시장 왜곡 등)  
+      피드백 데이터 자동 생성 및 학습 루프 설계
+    """)
