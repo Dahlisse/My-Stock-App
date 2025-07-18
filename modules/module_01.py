@@ -271,3 +271,14 @@ if __name__ == "__main__":
     ticker = st.text_input("종목 티커 입력 (예: AAPL, 005930.KS)")
     if ticker:
         module_01_main(ticker)
+        
+import streamlit as st
+
+def run():
+    st.subheader("📘 1. 기본 정보 분석")
+    # 여기에 module_01.py에서 실제 수행하는 기능 함수 호출
+    # 예시:
+    # run_basic_info_analysis() 또는 analyze_basic_info()
+
+    # 아래는 임시 출력용 예시
+    st.write("기본 정보 분석 모듈 실행 중입니다.")
