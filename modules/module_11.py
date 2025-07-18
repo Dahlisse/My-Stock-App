@@ -9,8 +9,9 @@ from tqdm import tqdm
 import warnings
 warnings.filterwarnings("ignore")
 
-from modules.module_04 import generate_dummy_portfolio
-# from modules.module_06 import evaluate_strategy_stability  # 현재 미사용 → 향후 활용 가능
+# from module_04 import simulate_strategy_once  # 현재 미사용
+from modules.module_04 import generate_dummy_portfolio, calc_performance_metrics
+
 
 class MassiveBacktester:
     def __init__(self, strategy_fn, scenario_generator, max_runs=100_000):
@@ -22,8 +23,7 @@ class MassiveBacktester:
     def _run_single_simulation(self, args):
         scenario = args
         try:
-            # 각 프로세스별 무작위성 보장
-            np.random.seed()  
+            np.random.seed()  # 각 프로세스별 시드 분리
             result = self.strategy_fn(scenario)
             return result
         except Exception as e:
@@ -52,17 +52,14 @@ class MassiveBacktester:
 
         fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
-        # 수익률 분포
         sns.histplot(df["return"], bins=50, ax=axes[0], kde=True)
         axes[0].axvline(df["return"].mean(), color="red", linestyle="--", label="평균")
         axes[0].set_title("수익률 분포")
         axes[0].legend()
 
-        # MDD 분포
         sns.histplot(df["mdd"], bins=50, ax=axes[1], kde=True, color="orange")
         axes[1].set_title("최대 낙폭 (MDD) 분포")
 
-        # 변동성 분포
         sns.histplot(df["volatility"], bins=50, ax=axes[2], kde=True, color="green")
         axes[2].set_title("변동성 분포")
 
@@ -101,33 +98,29 @@ class MassiveBacktester:
 
         return df.sort_values("stability_score", ascending=False).head(10)
 
-# 시나리오 예시 생성기
+
+# ✅ 시나리오 예시 생성기
 def sample_scenario_generator(n):
     scenarios = []
     for _ in range(n):
         scenarios.append({
-            "start_date": np.random.choice(["2015-01-01", "2018-01-01", "2020-01-01"]),
-            "duration": np.random.choice([252, 504, 756]),
-            "volatility_shift": np.random.uniform(0.8, 1.2),
-            "macro": np.random.choice(["low_rate", "high_oil", "recession"]),
+            "seed": np.random.randint(0, 1e6),
+            "days": np.random.choice([252, 504, 756]),  # 1~3년
         })
     return scenarios
 
-# 전략 함수 예시 (단순화)
+
+# ✅ 전략 함수 예시 (generate_dummy_portfolio 활용)
 def example_strategy_fn(scenario):
-    np.random.seed()
-    ret = np.random.normal(loc=0.12, scale=0.15)
-    mdd = np.random.uniform(0.05, 0.3)
-    vol = np.random.uniform(0.1, 0.25)
+    seed = scenario.get("seed", None)
+    days = scenario.get("days", 252)
+    df = generate_dummy_portfolio(days=days, seed=seed)
+    metrics = calc_performance_metrics(df)
+    metrics["scenario"] = scenario
+    return metrics
 
-    return {
-        "return": ret,
-        "mdd": mdd,
-        "volatility": vol,
-        "scenario": scenario
-    }
 
-# 실행 예시 (테스트용)
+# ✅ 실행 예시
 if __name__ == "__main__":
     tester = MassiveBacktester(
         strategy_fn=example_strategy_fn,
