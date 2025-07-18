@@ -1,6 +1,5 @@
 import streamlit as st
 import toml
-from modules.modules_device_detector import detect_device
 from modules.modules_device_detector import detect_device_info as detect_device
 from modules import (
     module_01, module_02, module_03, module_04, module_05,
