@@ -164,3 +164,28 @@ if __name__ == "__main__":
     switcher.visualize_strategy_map()
     next_strategy = switcher.simulate_transition("Strategy_A", "VIX > 30")
     print("📌 Transitioned Strategy:", next_strategy)
+    
+import streamlit as st
+
+def run():
+    st.header("📘 29단원. 전략 시나리오 설계 & 멀티 시뮬레이션 시스템")
+    st.markdown("""
+    “미래는 하나가 아니다. 모든 경우의 수에 대비하라.”
+
+    - 29.1 멀티 시나리오 전략 시뮬레이션 엔진  
+      금리, 환율, 지정학 리스크 등 시나리오 조건 정의  
+      전략 × 시나리오 조합 결과 자동 시뮬레이션  
+      “전략 A는 금리 상승기에서 MDD 8% → 전략 B 대체 필요”  
+      시나리오 기반 민감도 매트릭스 제공
+
+    - 29.2 복수 전략 조합 & 비중 시뮬레이션  
+      전략 A+B+C 조합 백테스트  
+      비중 변화 시 수익률/리스크 실시간 시각화  
+      “전략군 혼합 최적 포트: A 40% + B 35% + C 25%”  
+      전략 간 중복 종목 자동 제거 기능 포함
+
+    - 29.3 사용자 정의 이벤트 기반 전략 분기 설계  
+      VIX > 30 시 전략 전환 트리거 조건 정의  
+      시나리오 플로우차트 생성 + 자동 실행  
+      전체 전략 맵 시각화 및 전환 예측률 제공
+    """)
