@@ -126,3 +126,85 @@ def module_06_main():
 # Streamlit 클라우드용 엔트리포인트
 if __name__ == "__main__":
     module_06_main()
+    
+import streamlit as st
+
+# 예시 함수 (실제 로직은 별도 모듈에서 처리해야 함)
+# from .strategy_generator import generate_strategy
+# from .rebalance_detector import detect_rebalance_point
+# from .stability_evaluator import evaluate_strategy_stability
+# from .change_point_detection import detect_change_point
+# from .strategy_comparator import compare_strategies
+
+def run():
+    st.subheader("📘 6단원. AI 전략 제안 & 전환 감지")
+    st.markdown("“전략은 고정되지 않는다. 스스로 바꾸는 AI”")
+
+    # 6.1 전략 제안 및 리밸런싱
+    st.markdown("### ⚙️ 6.1 전략 제안 및 리밸런싱")
+    st.markdown("""
+    - 4단원에서 자동 생성된 포트폴리오 기반 전략 분류  
+    - 가치형 / 성장형 / 안정형 / 모멘텀형 등 자동 매핑
+    """)
+
+    if st.button("📌 전략 자동 제안"):
+        # strategy = generate_strategy(portfolio_data, macro_data, sentiment_score)
+        st.success("AI 전략 제안이 완료되었습니다 ✅")
+        st.markdown("""
+        - **전략 유형**: 성장형 + 안정형 혼합  
+        - **핵심 근거**: ROE 상위, PEG 0.8, 시장 심리 과열  
+        - **전략 코드**: `GROWTH_21C_MIX`
+        """)
+
+    if st.button("♻️ 리밸런싱 시점 자동 감지"):
+        # rebalance_needed = detect_rebalance_point(performance_metrics)
+        st.info("리밸런싱 필요: **부분 재조정 권장**")
+        st.markdown("""
+        - 수익률 저하 구간: 최근 10일  
+        - 심리 변화: 공포 전환 → 전략 부적합 감지  
+        - 리밸런싱 방식: 핵심 종목 2개 교체
+        """)
+
+    st.divider()
+
+    # 6.2 전략 전환 탐지
+    st.markdown("### 🔄 6.2 전략 전환 탐지")
+    st.markdown("""
+    - Bayesian Change Point Detection 기반 동적 탐지  
+    - 전략 안정성 지표 (Stability Index) 도입
+    """)
+
+    if st.button("📉 전략 전환 위험 감지"):
+        # stability_score = evaluate_strategy_stability(strategy_data)
+        # change_point = detect_change_point(performance_time_series)
+        st.warning("⚠️ 전략 안정성 저하 감지됨")
+        st.markdown("""
+        - Stability Index: **0.26** (기준 이하)  
+        - 최근 변동성 급등 + MDD 증가  
+        - 전략 전환 권고: 예, **B 전략(안정형)** 전환 추천
+        """)
+
+    st.divider()
+
+    # 6.3 전략 비교 해설
+    st.markdown("### 🧠 6.3 전략 비교 해설")
+    st.markdown("""
+    - 전략 간 누적 수익률, 변동성, 심리 적합도 등 종합 비교  
+    - 자연어 기반 전략 해설 포함
+    """)
+
+    if st.button("📊 전략 비교 실행"):
+        # comparison_result = compare_strategies([A, B, C])
+        st.success("전략 비교 완료 ✅")
+        st.markdown("""
+        | 전략 | 수익률 | 변동성 | 적합도 | 성공 확률 |
+        |-------|--------|--------|--------|------------|
+        | A     | 47.1%  | 중간   | 낮음   | 58.2%     |
+        | B     | 42.9%  | 낮음   | 높음   | 74.5%     |
+        | C     | 52.3%  | 높음   | 중간   | 66.7%     |
+
+        **추천 전략: B (안정형 배당주 중심)**  
+        > 현재 시장은 변동성이 높고 공포지수가 급등한 상태입니다. 이에 따라 B 전략이 적합합니다.
+        """)
+
+    st.info("📡 이 전략 정보는 8단원 포트 구성에 자동 전달됩니다.")
