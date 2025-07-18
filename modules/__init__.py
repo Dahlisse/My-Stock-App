@@ -1,0 +1,1 @@
+from .modules_device_detector import detect_device
