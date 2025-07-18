@@ -1,0 +1,6 @@
+[general]
+app_name = "My Stock App"
+version = "1.0"
+
+[settings]
+default_market = "KR"
