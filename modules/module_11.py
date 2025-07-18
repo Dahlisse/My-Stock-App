@@ -9,8 +9,8 @@ from tqdm import tqdm
 import warnings
 warnings.filterwarnings("ignore")
 
-from module_04 import simulate_strategy_once
-# from module_06 import evaluate_strategy_stability  # 현재 미사용 → 향후 활용 가능
+from modules.module_04 import generate_dummy_portfolio
+# from modules.module_06 import evaluate_strategy_stability  # 현재 미사용 → 향후 활용 가능
 
 class MassiveBacktester:
     def __init__(self, strategy_fn, scenario_generator, max_runs=100_000):
