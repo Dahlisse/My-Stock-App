@@ -102,50 +102,26 @@ def run_metric_comparator(strategy_df, returns_df):
     }
     
 import streamlit as st
-import datetime
 
 def run():
-    st.subheader("📘 18. 실행 자동화 시스템")
-    st.markdown("“전략을 설계하는 것만으로는 부족합니다. 실행까지 이어져야 합니다.”")
-
-    st.markdown("### ✅ 18.1 전략 실행 플로우 자동화")
+    st.header("📘 18단원. 전략 메트릭 비교 & 해석 시스템")
     st.markdown("""
-    - 전략 설계 → 실행 시뮬레이션 → 실시간 성과 추적 → 전략 교체 여부 판단 → 사용자 행동 가이드
-    - 자동화된 전략 실행 흐름으로 투자 이탈 최소화
+    “모든 전략은 숫자로 말하게 하라.”
+
+    - 18.1 전략 성과 메트릭 정규화  
+      CAGR, Sharpe, Calmar, Max Drawdown 통일 스케일  
+      시기별 변동성 보정 Sharpe  
+      왜도·첨도 등 고차 리스크 보정 포함  
+      해석 보조 문구 자동 생성
+
+    - 18.2 전략 간 상관관계 구조 시각화  
+      공분산, 상관계수 히트맵 제공  
+      상호보완 전략 자동 추출  
+      t-SNE/PCA 3D 포지셔닝 시각화  
+      해설 포함
+
+    - 18.3 전략 간 트레이드오프 분석  
+      수익률 vs 안정성 파레토 프론티어 시각화  
+      유사 전략 제거 → 다양성 최적화  
+      효율적 우위 판단 포함
     """)
-
-    # 시뮬레이션 시간대 선택
-    start_date = st.date_input("전략 실행 시작일", datetime.date.today() - datetime.timedelta(days=30))
-    end_date = st.date_input("전략 종료일", datetime.date.today())
-
-    st.success(f"선택된 전략 실행 기간: {start_date} ~ {end_date}")
-
-    st.markdown("### ✅ 18.2 전략 재진입 시점 자동 감지")
-    reentry_threshold = st.slider("전략 복귀 기준 수익률 (% 하락 시)", 1, 20, 7)
-    st.info(f"📉 전략 수익률이 {reentry_threshold}% 이상 하락하면 재진입 가이드가 표시됩니다.")
-
-    st.markdown("### ✅ 18.3 실행 내비게이션 예시")
-    st.markdown("""
-    - 현재 전략이 잠시 이탈 구간에 있습니다.
-    - **추천 행동:** 매도 보류 / 현금 비중 확대
-    - **예상 복귀 시점:** 약 2주 후 예상
-    """)
-
-    st.markdown("### ✅ 18.4 행동 이탈 방지 기능")
-    st.markdown("""
-    - 목표 수익률 도달 시 알림 → **“지금 수익 실현 타이밍입니다”**
-    - 손실 커질 시 자동 경고 → **“지금은 행동 자제. 변동성 높습니다”**
-    - 리밸런싱 조건 충족 시 자동 팝업 → **“부분 리밸런싱 권장됩니다”**
-    """)
-
-    st.markdown("### ✅ 18.5 자동화 실행 조건 설정")
-    realtime = st.checkbox("📡 실시간 추적 활성화", value=True)
-    tts = st.checkbox("🔊 음성 가이드 활성화 (TTS)", value=False)
-
-    if realtime:
-        st.success("🔄 실시간 전략 추적이 활성화되었습니다.")
-    if tts:
-        st.warning("🔊 음성 가이드는 Safari 브라우저에서 제한될 수 있습니다.")
-
-    st.markdown("---")
-    st.caption("※ 본 기능은 module_09(실시간 추적), module_10(음성 안내), module_24(사용자 성향)에 연결됩니다.")
